@@ -1,16 +1,16 @@
 import { prisma } from "../../lib/prisma";
 import { z } from "zod";
-// import { inferAsyncReturnType, inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 
 import { publicProcedure, router } from "../../server/trpc";
 
 export const todoRouter = router({
     getTodo: publicProcedure.input(z.number()).query(async({input})=>{
-        return await prisma.todo.findUnique({
+        const todo = await prisma.todo.findUnique({
             where: {
                 id: input
             }
         })
+        return todo
     }),
     getTodos: publicProcedure.query(async ()=>{
         return await prisma.todo.findMany({

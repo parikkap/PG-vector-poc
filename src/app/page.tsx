@@ -1,7 +1,6 @@
 "use client"
 import React from 'react'
 import Link from 'next/link'
-// import { serverClient } from '@/app/_trpc/serverClient'
 import { trpc } from "./_trpc/client"
 
 export default  function Home() {
@@ -19,7 +18,6 @@ export default  function Home() {
     onSettled:()=>{getTodos.refetch()}
   })
 
-
   const todos = getTodos.data
 
   return (
@@ -29,7 +27,6 @@ export default  function Home() {
        <table className="table min-w-[800px]">
           <thead>
             <tr>
-              <th>id</th>
               <th>Title</th>
               <th>Description</th>
               <th>Done</th>
@@ -39,7 +36,6 @@ export default  function Home() {
           <tbody>
             {todos.map(({id, title,description, done})=>(
               <tr className="hover">
-                <th>{id}</th>
                 <td><Link href={`/todo/${id}`} className="hover:underline">{title}</Link></td>
                 <td>{description}</td>
                 <td><input type="checkbox" checked={done} onChange={()=>setDone.mutate({id, done: !done})} className="checkbox" /></td>
