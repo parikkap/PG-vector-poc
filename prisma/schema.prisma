@@ -19,8 +19,3 @@ model Todo {
   createdAt   DateTime @default(now()) @db.Timestamp(0)
   updatedAt   DateTime @default(now()) @db.Timestamp(0)
 }
-
-model Foo {
-  id    Int @unique
-  foo   String
-}
