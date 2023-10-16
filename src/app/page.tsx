@@ -9,13 +9,19 @@ export default  function Home() {
 
   const getTodos = trpc.todo.getTodos.useQuery()
   const addTodo = trpc.todo.addTodo.useMutation({
-    onSettled:()=>{getTodos.refetch()}
+    onSettled:()=>{
+      getTodos.refetch()
+    }
   })
   const deleteTodo = trpc.todo.deleteTodo.useMutation({
-    onSettled:()=>{getTodos.refetch()}
+    onSettled:()=>{
+      getTodos.refetch()
+    }
   })
   const setDone = trpc.todo.setDone.useMutation({
-    onSettled:()=>{getTodos.refetch()}
+    onSettled:()=>{
+      getTodos.refetch()
+    }
   })
 
   const todos = getTodos.data
@@ -49,7 +55,7 @@ export default  function Home() {
         <input value={title} placeholder='title' className='input input-bordered w-full max-w-xs' name="title" onChange={(e)=>setTitle(e.target.value)} />
         <input value={description} placeholder='description' className='input input-bordered w-full max-w-xs' name="title" onChange={(e)=>setDescription(e.target.value)} />
         <button className='btn' onClick={()=>{
-            if (!title || !description){
+            if (!title){
               return
             } 
 
