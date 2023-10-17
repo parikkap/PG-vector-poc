@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate": "prisma migrate dev --name init"
   },
   "dependencies": {
     "@prisma/client": "^5.3.1",
@@ -15,7 +16,7 @@
     "@trpc/react-query": "^10.38.5",
     "@trpc/server": "^10.38.5",
     "next": "latest",
-    "prisma": "^5.3.1",
+    "prisma": "^5.4.2",
     "react": "latest",
     "react-dom": "latest",
     "zod": "^3.22.2"
