@@ -1,8 +1,8 @@
 import { router } from "./trpc";
-import { todoRouter } from "./router/todoRouter";
+import { embeddingRouter } from "./router/embeddingRouter";
 
 export const appRouter = router({
-    todo: todoRouter
+    todo: embeddingRouter
 })
 
 export type AppRouterType = typeof appRouter
