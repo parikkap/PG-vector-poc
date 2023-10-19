@@ -7,15 +7,14 @@ import { publicProcedure, router } from "../trpc";
 
 export const embeddingRouter = router({
     addEmbedding: publicProcedure.input(z.string()).mutation(async ({input}) =>{
-
         const embedding = pgvector.toSql([1, 2, 3]);
-
         try {
-            await prisma.$executeRaw`INSERT INTO Embeddings (embedding) VALUES (${embedding}::vector)`
-        } catch {
-            throw new Error("Error")
+            const data = await prisma.$executeRaw`INSERT INTO item (embedding) VALUES (${embedding}::vector)`
+            console.log("data",data)
+            return data
+        } catch (error) {
+            console.error("Error:", error);
+            throw new Error("Error");
         }
-
-        return "ok"
     }),
 })

@@ -12,7 +12,7 @@ datasource db {
   extensions = [vector]
 }
 
-model Embeddings {
-  id          Int      @id @default(autoincrement())
-  embedding   Unsupported("vector(3)")?
+model item {
+  id        Int                       @id @default(autoincrement())
+  embedding Unsupported("vector(3)")?
 }

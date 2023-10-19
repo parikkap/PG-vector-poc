@@ -2,9 +2,9 @@
 CREATE EXTENSION IF NOT EXISTS "vector";
 
 -- CreateTable
-CREATE TABLE "Embeddings" (
+CREATE TABLE "item" (
     "id" SERIAL NOT NULL,
     "embedding" vector(3),
 
-    CONSTRAINT "Embeddings_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "item_pkey" PRIMARY KEY ("id")
 );
