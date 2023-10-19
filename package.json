@@ -16,6 +16,7 @@
     "@trpc/react-query": "^10.38.5",
     "@trpc/server": "^10.38.5",
     "next": "latest",
+    "openai": "^4.0.0",
     "pgvector": "^0.1.5",
     "prisma": "^5.4.2",
     "react": "latest",
