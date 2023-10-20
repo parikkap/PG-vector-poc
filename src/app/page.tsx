@@ -4,6 +4,7 @@ import { trpc } from "./_trpc/client";
 
 export default function Home() {
   const [message, setMessage] = React.useState<string>("");
+  const [answer, setAnswer] = React.useState<string | null | undefined>("");
 
   const addTodo = trpc.todo.addEmbedding.useMutation();
   const addPdf = trpc.todo.addPdf.useMutation();
@@ -20,14 +21,14 @@ export default function Home() {
         />
         <button
           className="btn"
-          onClick={() => {
+          onClick={async () => {
             if (!message) {
               return;
             }
 
-            const response = addTodo.mutateAsync(message);
+            const response = await addTodo.mutateAsync(message);
             console.log(response);
-            setMessage("");
+            setAnswer(response?.content);
           }}
         >
           Add embedding
@@ -41,6 +42,7 @@ export default function Home() {
         >
           Add pdf
         </button>
+        <p>{answer}</p>
       </div>
     </main>
   );

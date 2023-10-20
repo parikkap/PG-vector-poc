@@ -34,11 +34,9 @@ export const embeddingRouter = router({
           await prisma.$queryRaw`SELECT id, embedding::text, document FROM item ORDER BY embedding <-> ${vectorSql}::vector LIMIT 5`;
 
         const chatGptPrompt = stripIndent`${oneLine`
-          You are a very enthusiastic Supabase representative who loves
-          to help people! Given the following sections from the Supabase
-          documentation, answer the question using only that information,
-          outputted in markdown format. If you are unsure and the answer
-          is not explicitly written in the documentation, say
+          You are a helpful pdf analyser bot, and you are helping a user with a question. The user ask you a question and you use the context to answer as as well as you can.
+          Start every answer with "Answer:"
+          If you don't know the answer, respond with:
           "Sorry, I don't know how to help with that."`}
       
           Context sections:
@@ -58,6 +56,7 @@ export const embeddingRouter = router({
         });
         console.log("response", response);
         console.log("message", response.choices[0].message);
+        return response.choices[0].message;
       } catch (error) {
         console.error("Error:", error);
       }
