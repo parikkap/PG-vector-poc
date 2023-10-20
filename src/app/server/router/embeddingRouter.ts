@@ -23,13 +23,6 @@ export const embeddingRouter = router({
 
         const vectorSql = pgvector.toSql(vector);
 
-        console.log("vectorSql", vectorSql);
-
-        // const items = await prisma.$queryRawUnsafe(
-        //   `SELECT * FROM item ORDER BY embedding <-> $1::vector LIMIT 5;`,
-        //   vectorSql
-        // );
-
         const items: { id: number; embedding: string; document: string }[] =
           await prisma.$queryRaw`SELECT id, embedding::text, document FROM item ORDER BY embedding <-> ${vectorSql}::vector LIMIT 5`;
 
@@ -45,8 +38,6 @@ export const embeddingRouter = router({
           Question: """
           ${processedPrompt}
           """
-      
-          Answer as markdown (including related code snippets if available):
         `;
         const response = await openAiClient.chat.completions.create({
           messages: [{ content: chatGptPrompt, role: "user" }],
@@ -54,18 +45,10 @@ export const embeddingRouter = router({
           max_tokens: 512,
           temperature: 0,
         });
-        console.log("response", response);
         console.log("message", response.choices[0].message);
         return response.choices[0].message;
       } catch (error) {
         console.error("Error:", error);
-      }
-
-      try {
-        // return response.choices[0].message;
-      } catch (error) {
-        console.error("Error:", error);
-        throw new Error("Error");
       }
     }),
 
