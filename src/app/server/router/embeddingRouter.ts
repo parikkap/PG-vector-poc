@@ -30,11 +30,10 @@ export const embeddingRouter = router({
         //   vectorSql
         // );
 
-        const result = await prisma.$queryRaw(
-          Prisma.sql`SELECT * FROM item ORDER BY embedding <-> ${vectorSql}::vector LIMIT 5;`
-        );
+        const items =
+          await prisma.$queryRaw`SELECT id, embedding::text, document FROM item ORDER BY embedding <-> ${vectorSql}::vector LIMIT 5`;
 
-        console.log("items", result);
+        console.log("items", items);
       } catch (error) {
         console.error("Error:", error);
       }
