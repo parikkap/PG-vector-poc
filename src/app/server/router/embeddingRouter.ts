@@ -28,7 +28,7 @@ export const embeddingRouter = router({
 
         const chatGptPrompt = stripIndent`${oneLine`
           You are a helpful pdf analyser bot, and you are helping a user with a question. The user ask you a question and you use the context to answer as as well as you can.
-          Start every answer with "Answer:"
+          
           If you don't know the answer, respond with:
           "Sorry, I don't know how to help with that."`}
       
