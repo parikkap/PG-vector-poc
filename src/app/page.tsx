@@ -4,8 +4,10 @@ import { trpc } from "./_trpc/client";
 
 export default function Home() {
   const [message, setMessage] = React.useState<string>("");
+  const [answer, setAnswer] = React.useState<string | null | undefined>("");
 
   const addTodo = trpc.todo.addEmbedding.useMutation();
+  const addPdf = trpc.todo.addPdf.useMutation();
 
   return (
     <main className="flex min-h-screen flex-col items-center p-24">
@@ -19,17 +21,28 @@ export default function Home() {
         />
         <button
           className="btn"
-          onClick={() => {
+          onClick={async () => {
             if (!message) {
               return;
             }
 
-            const response = addTodo.mutate(message);
-            setMessage("");
+            const response = await addTodo.mutateAsync(message);
+            console.log(response);
+            setAnswer(response?.content);
           }}
         >
           Add embedding
         </button>
+
+        <button
+          className="btn"
+          onClick={() => {
+            const response = addPdf.mutate(null);
+          }}
+        >
+          Add pdf
+        </button>
+        <p>{answer}</p>
       </div>
     </main>
   );

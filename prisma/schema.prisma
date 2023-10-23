@@ -14,5 +14,6 @@ datasource db {
 
 model item {
   id        Int                       @id @default(autoincrement())
-  embedding Unsupported("vector(3)")?
+  embedding Unsupported("vector(1536)")?
+  document String
 }
