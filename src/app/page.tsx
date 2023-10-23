@@ -3,29 +3,34 @@ import React from "react";
 import { trpc } from "./_trpc/client";
 import Image from "next/image"
 
-type chatMessageType = {
+type ChatMessageType = {
   sender: "user" | "server"
   message: string
 }
 
 export default function Home() {
   const [loading, setLoading] = React.useState<boolean>(false)
-  const [message, setMessage] = React.useState<string>("");
-  const [answer, setAnswer] = React.useState<string | null | undefined>("");
-  const [chat, setChat] = React.useState<chatMessageType[]>([
+  const [message, setMessage] = React.useState<string>("")
+  const [chat, setChat] = React.useState<ChatMessageType[]>([
     {
       sender: "server",
       message: "Please ask a question"
     }
-  ])
+  ]) 
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const addTodo = trpc.todo.addEmbedding.useMutation();
   const addPdf = trpc.todo.addPdf.useMutation();
 
-  const handleEnterPressed = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      sendMessage()
+  const scrollToBottom = () => {
+    //TODO: Fix server answer not triggering scroll bottom
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   };
+
+  React.useEffect(()=>{
+    scrollToBottom()
+  }, [chat])
 
   const sendMessage = async () => {
     if (!message || loading) {
@@ -39,25 +44,21 @@ export default function Home() {
     })
     setChat(messages)
     setMessage("")
-    window.scrollTo(0, 0)
-
+    
     const response = await addTodo.mutateAsync(message);
     const serverMessage = response?.content
 
     if (!serverMessage) {
-      messages.push({
-        sender: "server",
-        message: ":( Sorry I messed up."
-      })
-      setLoading(false)
-      return setChat(messages)
+      throw new Error("Error: No message from server!")
     }
 
     messages.push({
       sender: "server",
       message: serverMessage
     })
+
     setLoading(false)
+    setChat(messages)
   }
 
   return (
@@ -65,8 +66,8 @@ export default function Home() {
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center justify-center relative">
-            <div className="flex flex-col w-full gap-4 h-screen overflow-scroll pt-8 pb-24 px-8">
-            <div id="chat">
+            <div className="flex flex-col w-full gap-4 h-screen pt-8 pb-28 ">
+            <div id="chat" ref={containerRef} className="overflow-scroll px-8">
               {chat.map((item, index)=>{
                 if (item.sender === "server"){
                   return (
@@ -118,7 +119,12 @@ export default function Home() {
                   className="input input-bordered w-full"
                   name="Message"
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyDown={handleEnterPressed}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      sendMessage()
+                    }
+                  }
+                }
                 />
                 <button
                   className="btn"
