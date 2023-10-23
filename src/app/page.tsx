@@ -39,6 +39,7 @@ export default function Home() {
     })
     setChat(messages)
     setMessage("")
+    window.scrollTo(0, 0)
 
     const response = await addTodo.mutateAsync(message);
     const serverMessage = response?.content
@@ -63,69 +64,71 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center">
       <div className="drawer drawer-open">
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content flex flex-col items-center justify-center">
-          <div className="flex flex-col w-full gap-4 h-screen py-16 px-8">
-          <div id="chat">
-            {chat.map((item, index)=>{
-              if (item.sender === "server"){
+        <div className="drawer-content flex flex-col items-center justify-center relative">
+            <div className="flex flex-col w-full gap-4 h-screen overflow-scroll pt-8 pb-24 px-8">
+            <div id="chat">
+              {chat.map((item, index)=>{
+                if (item.sender === "server"){
+                  return (
+                    <div key={index} className="chat chat-start">
+                      <div className="chat-image avatar">
+                        <div className="w-10 rounded-full bg-red">
+                          <Image src="/next.svg" width={100} height={100} alt=""/>
+                        </div>
+                      </div>
+                      <div className="chat-header">
+                        {item.sender}
+                      </div>
+                      <div className="chat-bubble chat-bubble-primary">{item.message}</div>
+                    </div>
+                  )
+                }
+
                 return (
-                  <div key={index} className="chat chat-start">
+                  <div className="chat chat-end" key={index}>
                     <div className="chat-image avatar">
-                      <div className="w-10 rounded-full bg-red">
-                        <Image src="/next.svg" width={100} height={100} alt=""/>
+                      <div className="w-10 rounded-full">
+                        <Image src="/vercel.svg" width={100} height={100} alt=""/>
                       </div>
                     </div>
                     <div className="chat-header">
                       {item.sender}
                     </div>
-                    <div className="chat-bubble chat-bubble-primary">{item.message}</div>
+                    <div className="chat-bubble chat-bubble-secondary">{item.message}</div>
                   </div>
                 )
-              }
-
-              return (
-                <div className="chat chat-end" key={index}>
+              })}
+              {loading ?  
+                <div className="chat chat-start">
                   <div className="chat-image avatar">
-                    <div className="w-10 rounded-full">
-                      <Image src="/vercel.svg" width={100} height={100} alt=""/>
+                      <div className="w-10 rounded-full bg-red">
+                        <Image src="/next.svg" width={100} height={100} alt=""/>
+                      </div>
                     </div>
+                  <div className="chat-bubble chat-bubble-primary">
+                    <span className="loading loading-dots loading-xs"></span>
                   </div>
-                  <div className="chat-header">
-                    {item.sender}
-                  </div>
-                  <div className="chat-bubble chat-bubble-secondary">{item.message}</div>
-                </div>
-              )
-            })}
-            {loading ?  
-              <div className="chat chat-start">
-                <div className="chat-image avatar">
-                    <div className="w-10 rounded-full bg-red">
-                      <Image src="/next.svg" width={100} height={100} alt=""/>
-                    </div>
-                  </div>
-                <div className="chat-bubble chat-bubble-primary">
-                  <span className="loading loading-dots loading-xs"></span>
-                </div>
-              </div> : null}
-          </div>
-          <div className="flex flex-row gap-2 mt-auto">
-            <input
-              value={message}
-              placeholder="message..."
-              className="input input-bordered w-full"
-              name="Message"
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleEnterPressed}
-            />
-            <button
-              className="btn"
-              disabled={loading}
-              onClick={sendMessage}
-            >
-              Ask
-            </button>
-          </div>
+                </div> : null}
+            </div>
+            <div className="mt-auto w-full bg-base-100 bottom-0 left-0 py-4 absolute border-t-2">
+              <div className="px-8 flex flex-row gap-2 ">
+                <input
+                  value={message}
+                  placeholder="message..."
+                  className="input input-bordered w-full"
+                  name="Message"
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={handleEnterPressed}
+                />
+                <button
+                  className="btn"
+                  disabled={loading}
+                  onClick={sendMessage}
+                >
+                  Ask
+                </button>
+              </div>
+            </div>
         </div>
         </div> 
         <div className="drawer-side bg-base-200 p-4">
