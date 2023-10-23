@@ -15,7 +15,7 @@ export default function Home() {
   const [chat, setChat] = React.useState<chatMessageType[]>([
     {
       sender: "server",
-      message: "Please as a question"
+      message: "Please ask a question"
     }
   ])
   const addTodo = trpc.todo.addEmbedding.useMutation();
@@ -28,7 +28,7 @@ export default function Home() {
   };
 
   const sendMessage = async () => {
-    if (!message) {
+    if (!message || loading) {
       return;
     }
     setLoading(true)
@@ -38,6 +38,7 @@ export default function Home() {
       message
     })
     setChat(messages)
+    setMessage("")
 
     const response = await addTodo.mutateAsync(message);
     const serverMessage = response?.content
@@ -56,7 +57,6 @@ export default function Home() {
       message: serverMessage
     })
     setLoading(false)
-    setMessage("")
   }
 
   return (
