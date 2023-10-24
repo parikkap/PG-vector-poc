@@ -10,7 +10,7 @@ type ChatMessageType = {
 
 export default function Home() {
   const [loading, setLoading] = React.useState<boolean>(false)
-  const [message, setMessage] = React.useState<string>("")
+  const [userMessage, setUserMessage] = React.useState<string>("")
   const [chat, setChat] = React.useState<ChatMessageType[]>([
     {
       sender: "server",
@@ -32,33 +32,32 @@ export default function Home() {
     scrollToBottom()
   }, [chat])
 
-  const sendMessage = async () => {
-    if (!message || loading) {
+  const updateChat = (message: ChatMessageType) => {
+    setChat(prevChat => [...prevChat, message])
+  }
+
+  const sendMessageToServer = async () => {
+    if (!userMessage || loading) {
       return;
     }
     setLoading(true)
-    const messages = [...chat]
-    messages.push({
-      sender: "user",
-      message
-    })
-    setChat(messages)
-    setMessage("")
+    updateChat({sender: "user", message: userMessage})
+    setUserMessage("")
     
-    const response = await addTodo.mutateAsync(message);
+    const response = await addTodo.mutateAsync(userMessage);
     const serverMessage = response?.content
 
     if (!serverMessage) {
+      setLoading(false)
       throw new Error("Error: No message from server!")
     }
 
-    messages.push({
+    updateChat({
       sender: "server",
       message: serverMessage
     })
 
     setLoading(false)
-    setChat(messages)
   }
 
   return (
@@ -114,14 +113,14 @@ export default function Home() {
             <div className="mt-auto w-full bg-base-100 bottom-0 left-0 py-4 absolute border-t-2">
               <div className="px-8 flex flex-row gap-2 ">
                 <input
-                  value={message}
+                  value={userMessage}
                   placeholder="message..."
                   className="input input-bordered w-full"
                   name="Message"
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => setUserMessage(e.target.value)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter') {
-                      sendMessage()
+                      sendMessageToServer()
                     }
                   }
                 }
@@ -129,7 +128,7 @@ export default function Home() {
                 <button
                   className="btn"
                   disabled={loading}
-                  onClick={sendMessage}
+                  onClick={() => sendMessageToServer()}
                 >
                   Ask
                 </button>
