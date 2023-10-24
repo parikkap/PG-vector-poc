@@ -66,37 +66,7 @@ export default function Home() {
         <div className="drawer-content flex flex-col items-center justify-center relative">
             <div className="flex flex-col w-full gap-4 h-screen pt-8 pb-28 ">
             <div id="chat" ref={containerRef} className="overflow-scroll px-8">
-              {chat.map((item, index)=>{
-                if (item.sender === "server"){
-                  return (
-                    <div key={index} className="chat chat-start">
-                      <div className="chat-image avatar">
-                        <div className="w-10 rounded-full bg-red">
-                          <Image src="/next.svg" width={100} height={100} alt=""/>
-                        </div>
-                      </div>
-                      <div className="chat-header">
-                        {item.sender}
-                      </div>
-                      <div className="chat-bubble chat-bubble-primary">{item.message}</div>
-                    </div>
-                  )
-                }
-
-                return (
-                  <div className="chat chat-end" key={index}>
-                    <div className="chat-image avatar">
-                      <div className="w-10 rounded-full">
-                        <Image src="/vercel.svg" width={100} height={100} alt=""/>
-                      </div>
-                    </div>
-                    <div className="chat-header">
-                      {item.sender}
-                    </div>
-                    <div className="chat-bubble chat-bubble-secondary">{item.message}</div>
-                  </div>
-                )
-              })}
+              {chat.map((item, index)=><ChatComponent key={index} {...item}/>)}
               {loading ?  
                 <div className="chat chat-start">
                   <div className="chat-image avatar">
@@ -159,5 +129,19 @@ export default function Home() {
   );
 }
 
-
-
+const ChatComponent = (chat: ChatMessageType) => {
+  const isServer = chat.sender === "server"
+  return (
+    <div className={`chat ${isServer ? "chat-start" : "chat-end"}`}>
+    <div className="chat-image avatar">
+      <div className="w-10 rounded-full bg-red">
+        <Image src={isServer ? "/next.svg" : "/vercel.svg"} width={100} height={100} alt=""/>
+      </div>
+    </div>
+    <div className="chat-header">
+      {chat.sender}
+    </div>
+    <div className={`chat-bubble ${isServer ? "chat-bubble-primary" : "chat-bubble-secondary"} `}>{chat.message}</div>
+  </div>
+  )
+}
