@@ -26,22 +26,20 @@ export const embeddingRouter = router({
         const items: { id: number; embedding: string; document: string }[] =
           await prisma.$queryRaw`SELECT id, embedding::text, document FROM item ORDER BY embedding <-> ${vectorSql}::vector LIMIT 5`;
 
-        const chatGptPrompt = stripIndent`${oneLine`
+        const response = await openAiClient.chat.completions.create({
+          messages: [
+            {content: stripIndent`${oneLine`
           You are a helpful pdf analyser bot, and you are helping a user with a question. The user ask you a question and you use the context to answer as as well as you can.
-          Start every answer with "Answer:"
           If you don't know the answer, respond with:
           "Sorry, I don't know how to help with that."`}
-      
+
           Context sections:
           ${items[0].document}
-      
-          Question: """
-          ${processedPrompt}
-          """
-        `;
-        const response = await openAiClient.chat.completions.create({
-          messages: [{ content: chatGptPrompt, role: "user" }],
-          model: "gpt-3.5-turbo",
+          `,
+          role: "system"},
+            { content: processedPrompt, role: "user" }
+        ],
+          model: "gpt-4",
           max_tokens: 512,
           temperature: 0,
         });
