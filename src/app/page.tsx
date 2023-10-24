@@ -22,7 +22,6 @@ export default function Home() {
   const addPdf = trpc.todo.addPdf.useMutation();
 
   const scrollToBottom = () => {
-    //TODO: Fix server answer not triggering scroll bottom
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
