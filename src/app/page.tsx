@@ -2,6 +2,7 @@
 import React from 'react'
 import { trpc } from './_trpc/client'
 import Image from 'next/image'
+import { ReactDropZone } from './components/ReactDropZone'
 
 type ChatMessageType = {
   sender: 'user' | 'server'
@@ -17,6 +18,8 @@ export default function Home() {
       message: 'Please ask a question',
     },
   ])
+
+  const [files, setFiles] = React.useState<File[]>([])
   const containerRef = React.useRef<HTMLDivElement>(null)
   const addTodo = trpc.todo.addEmbedding.useMutation()
   const addPdf = trpc.todo.addPdf.useMutation()
@@ -57,6 +60,10 @@ export default function Home() {
     })
 
     setLoading(false)
+  }
+
+  const handleAcceptedDrop = async (files: File[]) => {
+    setFiles(files)
   }
 
   return (
@@ -108,9 +115,9 @@ export default function Home() {
           </div>
         </div>
         <div className="drawer-side bg-base-200 p-4">
-          <ul className="menu w-80 min-h-fulltext-base-content">
-            {/* List uploaded files */}
-            <li>File.pdf</li>
+          {/* <ul className="menu w-80 min-h-fulltext-base-content"> */}
+          {/* List uploaded files */}
+          {/* <li>File.pdf</li>
           </ul>
           <div className="flex flex-col gap-4">
             <label
@@ -126,8 +133,24 @@ export default function Home() {
               }}
             >
               Add pdf
-            </button>
-          </div>
+            </button>*/}
+
+          <ReactDropZone onDropAccepted={handleAcceptedDrop} />
+
+          {files.length > 0 && (
+            <div>
+              <div>{files.map((file) => file.name)}</div>
+            </div>
+          )}
+
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              addPdf.mutate('')
+            }}
+          >
+            Add pdf
+          </button>
         </div>
       </div>
     </main>
