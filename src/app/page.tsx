@@ -11,9 +11,6 @@ type ChatMessageType = {
 export default function Home() {
   const [loading, setLoading] = React.useState<boolean>(false)
   const [userMessage, setUserMessage] = React.useState<string>('')
-  const [fileLocation, setFileLocation] = React.useState<string | undefined>(
-    undefined
-  )
   const [chat, setChat] = React.useState<ChatMessageType[]>([
     {
       sender: 'server',
@@ -129,20 +126,35 @@ export default function Home() {
               type="file"
               className="file-input w-full max-w-xs"
               accept=".pdf"
-              onChange={(e) => {
-                console.log(e.target.value)
-                setFileLocation(e.target.value)
-                console.log(fileLocation)
+              onChange={async (e) => {
+                e.preventDefault()
+                const file = e.target.files?.[0]
+                if (!file) return
+
+                try {
+                  const data = new FormData()
+                  data.set('file', file)
+
+                  const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: data,
+                  })
+                  // handle the error
+                  if (!res.ok) throw new Error(await res.text())
+                } catch (e) {
+                  // Handle errors here
+                  console.error(e)
+                }
               }}
             />
-            <button
+            {/* <button
               className="btn btn-primary"
               onClick={() => {
                 addPdf.mutate(null)
               }}
             >
               Add pdf
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
