@@ -11,6 +11,7 @@ type ChatMessageType = {
 export default function Home() {
   const [loading, setLoading] = React.useState<boolean>(false)
   const [userMessage, setUserMessage] = React.useState<string>('')
+  const [file, setFile] = React.useState<string>('')
   const [chat, setChat] = React.useState<ChatMessageType[]>([
     {
       sender: 'server',
@@ -18,8 +19,7 @@ export default function Home() {
     },
   ])
   const containerRef = React.useRef<HTMLDivElement>(null)
-  const addTodo = trpc.todo.addEmbedding.useMutation()
-  const addPdf = trpc.todo.addPdf.useMutation()
+  const ask = trpc.bot.ask.useMutation()
 
   const scrollToBottom = () => {
     if (containerRef.current) {
@@ -43,7 +43,7 @@ export default function Home() {
     updateChat({ sender: 'user', message: userMessage })
     setUserMessage('')
 
-    const response = await addTodo.mutateAsync(userMessage)
+    const response = await ask.mutateAsync(userMessage)
     const serverMessage = response?.content
 
     if (!serverMessage) {
@@ -65,7 +65,11 @@ export default function Home() {
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center justify-center relative">
           <div className="flex flex-col w-full gap-4 h-screen pt-8 pb-28 ">
-            <div id="chat" ref={containerRef} className="overflow-scroll px-8">
+            <div
+              id="chat"
+              ref={containerRef}
+              className="overflow-y-scroll px-8"
+            >
               {chat.map((item, index) => (
                 <ChatComponent key={index} {...item} />
               ))}
@@ -91,13 +95,16 @@ export default function Home() {
                   name="Message"
                   onChange={(e) => setUserMessage(e.target.value)}
                   onKeyDown={(event) => {
+                    if (loading) {
+                      return
+                    }
                     if (event.key === 'Enter') {
                       sendMessageToServer()
                     }
                   }}
                 />
                 <button
-                  className="btn"
+                  className={`btn ${loading && 'opacity-60 cursor-wait'}`}
                   disabled={loading}
                   onClick={() => sendMessageToServer()}
                 >
@@ -110,7 +117,7 @@ export default function Home() {
         <div className="drawer-side bg-base-200 p-4">
           <ul className="menu w-80 min-h-fulltext-base-content">
             {/* List uploaded files */}
-            <li>File.pdf</li>
+            {/* <li>File.pdf</li> */}
           </ul>
           <div className="flex flex-col gap-4">
             <label
@@ -118,15 +125,39 @@ export default function Home() {
               aria-label="close sidebasr"
               className="drawer-overlay"
             ></label>
-            <input type="file" className="file-input w-full max-w-xs" />
-            <button
+            <FileInput
+              value={file}
+              disabled={loading}
+              onChange={async (e) => {
+                e.preventDefault()
+                setFile(e.target.value)
+                const file = e.target.files?.[0]
+                if (!file) return
+                try {
+                  const data = new FormData()
+                  data.set('file', file)
+
+                  const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: data,
+                  })
+                  // handle the error
+                  if (!res.ok) throw new Error(await res.text())
+                } catch (e) {
+                  // Handle errors here
+                  console.error(e)
+                }
+                setFile('')
+              }}
+            />
+            {/* <button
               className="btn btn-primary"
               onClick={() => {
                 addPdf.mutate(null)
               }}
             >
               Add pdf
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
@@ -156,6 +187,40 @@ const ChatComponent = (chat: ChatMessageType) => {
       >
         {chat.message}
       </div>
+    </div>
+  )
+}
+
+type FileInputType = React.InputHTMLAttributes<HTMLInputElement> & {
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+}
+
+const FileInput = ({ onChange, ...remainingProps }: FileInputType) => {
+  const [loading, setLoading] = React.useState<boolean>(false)
+
+  const handleOnChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoading(true)
+    await onChange(e)
+    setLoading(false)
+  }
+
+  return (
+    <div
+      className={`flex flex-col gap-4 relative ${
+        loading && 'opacity-60 cursor-wait'
+      }`}
+    >
+      <input
+        type="file"
+        className={`file-input w-full max-w-xs`}
+        accept=".pdf"
+        disabled={loading}
+        {...remainingProps}
+        onChange={async (e) => handleOnChange(e)}
+      />
+      {loading && (
+        <span className="loading loading-spinner loading-xl mx-auto" />
+      )}
     </div>
   )
 }
