@@ -11,6 +11,9 @@ type ChatMessageType = {
 export default function Home() {
   const [loading, setLoading] = React.useState<boolean>(false)
   const [userMessage, setUserMessage] = React.useState<string>('')
+  const [fileLocation, setFileLocation] = React.useState<string | undefined>(
+    undefined
+  )
   const [chat, setChat] = React.useState<ChatMessageType[]>([
     {
       sender: 'server',
@@ -18,8 +21,8 @@ export default function Home() {
     },
   ])
   const containerRef = React.useRef<HTMLDivElement>(null)
-  const addTodo = trpc.todo.addEmbedding.useMutation()
-  const addPdf = trpc.todo.addPdf.useMutation()
+  const ask = trpc.bot.ask.useMutation()
+  const addPdf = trpc.bot.addPdf.useMutation()
 
   const scrollToBottom = () => {
     if (containerRef.current) {
@@ -43,7 +46,7 @@ export default function Home() {
     updateChat({ sender: 'user', message: userMessage })
     setUserMessage('')
 
-    const response = await addTodo.mutateAsync(userMessage)
+    const response = await ask.mutateAsync(userMessage)
     const serverMessage = response?.content
 
     if (!serverMessage) {
@@ -65,7 +68,11 @@ export default function Home() {
         <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col items-center justify-center relative">
           <div className="flex flex-col w-full gap-4 h-screen pt-8 pb-28 ">
-            <div id="chat" ref={containerRef} className="overflow-scroll px-8">
+            <div
+              id="chat"
+              ref={containerRef}
+              className="overflow-y-scroll px-8"
+            >
               {chat.map((item, index) => (
                 <ChatComponent key={index} {...item} />
               ))}
@@ -110,7 +117,7 @@ export default function Home() {
         <div className="drawer-side bg-base-200 p-4">
           <ul className="menu w-80 min-h-fulltext-base-content">
             {/* List uploaded files */}
-            <li>File.pdf</li>
+            {/* <li>File.pdf</li> */}
           </ul>
           <div className="flex flex-col gap-4">
             <label
@@ -118,7 +125,16 @@ export default function Home() {
               aria-label="close sidebasr"
               className="drawer-overlay"
             ></label>
-            <input type="file" className="file-input w-full max-w-xs" />
+            <input
+              type="file"
+              className="file-input w-full max-w-xs"
+              accept=".pdf"
+              onChange={(e) => {
+                console.log(e.target.value)
+                setFileLocation(e.target.value)
+                console.log(fileLocation)
+              }}
+            />
             <button
               className="btn btn-primary"
               onClick={() => {
