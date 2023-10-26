@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { File } from 'buffer'
-// import pdf from 'pdf-parse'
+import pdf from 'pdf-parse'
 
 export async function POST(request: NextRequest) {
   const data = await request.formData()
@@ -15,12 +15,12 @@ export async function POST(request: NextRequest) {
   console.log(file)
 
   // Do something with the file...
-  // const fileBlob = await file.arrayBuffer()
-  // const buffer = Buffer.from(fileBlob)
+  const fileBlob = await file.arrayBuffer()
+  const buffer = Buffer.from(fileBlob)
 
   try {
-    // const pdfText = await pdf(buffer)
-    // console.log('PDF data:', pdfText)
+    const pdfText = await pdf(buffer)
+    console.log('PDF data:', pdfText)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error parsing PDF:', error)
