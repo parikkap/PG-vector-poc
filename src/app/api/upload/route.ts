@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { File } from 'buffer'
 import pdf from 'pdf-parse'
+import { stripIndent, oneLine } from 'common-tags'
+
+import { openAiClient } from '@/app/lib/openAIClient'
+import { prisma } from '@/app/lib/prisma'
+import pgvector from 'pgvector/utils'
 
 export async function POST(request: NextRequest) {
   const data = await request.formData()
@@ -17,17 +22,45 @@ export async function POST(request: NextRequest) {
   // Do something with the file...
   const fileBlob = await file.arrayBuffer()
   const buffer = Buffer.from(fileBlob)
+  const pdfContent = await pdf(buffer)
 
-  try {
-    const pdfText = await pdf(buffer)
-    console.log('PDF data:', pdfText)
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Error parsing PDF:', error)
-    console.error('Failed to extract PDF text')
-    return NextResponse.json({
-      success: false,
-      error: 'Failed to extract PDF text',
-    })
+  const strippedText = oneLine(stripIndent(pdfContent.text))
+  const { numpages } = pdfContent
+  const limiter = numpages / 3
+  const sentences = strippedText.match(/[^.!?]+[.!?]+/g) || []
+  const numSentences = sentences.length
+  const sentencesPerBlock = Math.ceil(numSentences / limiter)
+
+  const textBlocks = []
+
+  let sentenceIndex = 0
+  //TODO: Make table for documents and pages so we can refer them later
+  // let page = 1
+  for (let i = 0; i < numSentences; i += sentencesPerBlock) {
+    const blockSentences = sentences.slice(i, i + sentencesPerBlock)
+    let block = blockSentences.join(' ')
+
+    // If the block doesn't end with a sentence, extend it until we find a sentence-ending dot
+    while (sentenceIndex < sentences.length && !block.endsWith('.')) {
+      block += sentences[sentenceIndex++]
+    }
+    textBlocks.push(block)
+    // page += 1
+    // console.log('page:', page)
+    try {
+      const embedding = await openAiClient.embeddings.create({
+        model: 'text-embedding-ada-002',
+        input: block,
+      })
+
+      const vector = embedding.data[0].embedding
+      const vectorSql = pgvector.toSql(vector)
+
+      await prisma.$executeRaw`INSERT INTO item (embedding, document) VALUES (${vectorSql}::vector, ${block})`
+    } catch (error) {
+      console.error('Error:', error)
+    }
   }
+
+  return NextResponse.json({ success: true })
 }
