@@ -95,13 +95,16 @@ export default function Home() {
                   name="Message"
                   onChange={(e) => setUserMessage(e.target.value)}
                   onKeyDown={(event) => {
+                    if (loading) {
+                      return
+                    }
                     if (event.key === 'Enter') {
                       sendMessageToServer()
                     }
                   }}
                 />
                 <button
-                  className="btn"
+                  className={`btn ${loading && 'opacity-60 cursor-wait'}`}
                   disabled={loading}
                   onClick={() => sendMessageToServer()}
                 >
@@ -122,11 +125,9 @@ export default function Home() {
               aria-label="close sidebasr"
               className="drawer-overlay"
             ></label>
-            <input
-              type="file"
-              className="file-input w-full max-w-xs"
-              accept=".pdf"
+            <FileInput
               value={file}
+              disabled={loading}
               onChange={async (e) => {
                 e.preventDefault()
                 setFile(e.target.value)
@@ -186,6 +187,40 @@ const ChatComponent = (chat: ChatMessageType) => {
       >
         {chat.message}
       </div>
+    </div>
+  )
+}
+
+type FileInputType = React.InputHTMLAttributes<HTMLInputElement> & {
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+}
+
+const FileInput = ({ onChange, ...remainingProps }: FileInputType) => {
+  const [loading, setLoading] = React.useState<boolean>(false)
+
+  const handleOnChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoading(true)
+    await onChange(e)
+    setLoading(false)
+  }
+
+  return (
+    <div
+      className={`flex flex-col gap-4 relative ${
+        loading && 'opacity-60 cursor-wait'
+      }`}
+    >
+      <input
+        type="file"
+        className={`file-input w-full max-w-xs`}
+        accept=".pdf"
+        disabled={loading}
+        {...remainingProps}
+        onChange={async (e) => handleOnChange(e)}
+      />
+      {loading && (
+        <span className="loading loading-spinner loading-xl mx-auto" />
+      )}
     </div>
   )
 }
