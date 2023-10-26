@@ -34,19 +34,16 @@ export async function POST(request: NextRequest) {
   const textBlocks = []
 
   let sentenceIndex = 0
-  //TODO: Make table for documents and pages so we can refer them later
-  // let page = 1
+
   for (let i = 0; i < numSentences; i += sentencesPerBlock) {
     const blockSentences = sentences.slice(i, i + sentencesPerBlock)
     let block = blockSentences.join(' ')
 
-    // If the block doesn't end with a sentence, extend it until we find a sentence-ending dot
     while (sentenceIndex < sentences.length && !block.endsWith('.')) {
       block += sentences[sentenceIndex++]
     }
     textBlocks.push(block)
-    // page += 1
-    // console.log('page:', page)
+
     try {
       const embedding = await openAiClient.embeddings.create({
         model: 'text-embedding-ada-002',
