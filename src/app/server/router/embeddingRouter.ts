@@ -33,7 +33,7 @@ export const embeddingRouter = router({
           "Sorry, I don't know how to help with that."`}
 
           Context sections:
-          ${items[0].document}
+          ${items.map((doc) => doc.document)}
           `,
             role: 'system',
           },
