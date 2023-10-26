@@ -8,13 +8,10 @@ export async function POST(request: NextRequest) {
   const FileSchema = z.instanceof(File)
   const file = FileSchema.parse(data.get('file') as unknown)
 
-  if (!file) {
+  if (!file || file.type !== 'application/pdf') {
     return NextResponse.json({ success: false, error: 'Invalid file' })
   }
 
-  if (file.type !== 'application/pdf') {
-    return NextResponse.json({ success: false, error: 'Not a PDF file' })
-  }
   console.log(file)
 
   // Do something with the file...
