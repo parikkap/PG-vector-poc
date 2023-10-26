@@ -1,25 +1,36 @@
-// import { writeFile } from 'fs/promises'
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { File } from 'buffer'
+// import pdf from 'pdf-parse'
 
 export async function POST(request: NextRequest) {
   const data = await request.formData()
-  const file: File | null = data.get('file') as unknown as File
+  const FileSchema = z.instanceof(File)
+  const file = FileSchema.parse(data.get('file') as unknown)
 
   if (!file) {
-    return NextResponse.json({ success: false })
+    return NextResponse.json({ success: false, error: 'Invalid file' })
   }
-  //Do stuff
 
-  console.log('---FILE----', file)
+  if (file.type !== 'application/pdf') {
+    return NextResponse.json({ success: false, error: 'Not a PDF file' })
+  }
+  console.log(file)
 
-  //   const bytes = await file.arrayBuffer()
-  //   const buffer = Buffer.from(bytes)
+  // Do something with the file...
+  // const fileBlob = await file.arrayBuffer()
+  // const buffer = Buffer.from(fileBlob)
 
-  //   // With the file data in the buffer, you can do whatever you want with it.
-  //   // For this, we'll just write it to the filesystem in a new location
-  //   const path = `/tmp/${file.name}`
-  //   await writeFile(path, buffer)
-  //   console.log(`open ${path} to see the uploaded file`)
-
-  return NextResponse.json({ success: true })
+  try {
+    // const pdfText = await pdf(buffer)
+    // console.log('PDF data:', pdfText)
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error parsing PDF:', error)
+    console.error('Failed to extract PDF text')
+    return NextResponse.json({
+      success: false,
+      error: 'Failed to extract PDF text',
+    })
+  }
 }

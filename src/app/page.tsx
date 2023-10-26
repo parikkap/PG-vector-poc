@@ -11,6 +11,7 @@ type ChatMessageType = {
 export default function Home() {
   const [loading, setLoading] = React.useState<boolean>(false)
   const [userMessage, setUserMessage] = React.useState<string>('')
+  const [file, setFile] = React.useState<string>('')
   const [chat, setChat] = React.useState<ChatMessageType[]>([
     {
       sender: 'server',
@@ -19,7 +20,6 @@ export default function Home() {
   ])
   const containerRef = React.useRef<HTMLDivElement>(null)
   const ask = trpc.bot.ask.useMutation()
-  const addPdf = trpc.bot.addPdf.useMutation()
 
   const scrollToBottom = () => {
     if (containerRef.current) {
@@ -126,11 +126,12 @@ export default function Home() {
               type="file"
               className="file-input w-full max-w-xs"
               accept=".pdf"
+              value={file}
               onChange={async (e) => {
                 e.preventDefault()
+                setFile(e.target.value)
                 const file = e.target.files?.[0]
                 if (!file) return
-
                 try {
                   const data = new FormData()
                   data.set('file', file)
@@ -145,6 +146,7 @@ export default function Home() {
                   // Handle errors here
                   console.error(e)
                 }
+                setFile('')
               }}
             />
             {/* <button
